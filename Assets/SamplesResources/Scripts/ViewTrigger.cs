@@ -67,9 +67,10 @@ public class ViewTrigger : MonoBehaviour
                 mFocusedTime = 0;
 
                 // Activate transition from AR to VR or vice versa
-                bool goingBackToAR = (triggerType == TriggerType.AR_TRIGGER);
-                mTransitionManager.Play(goingBackToAR);
-                StartCoroutine(ResetAfter(0.3f * mTransitionManager.TransitionDuration));
+                /*bool goingBackToAR = (triggerType == TriggerType.AR_TRIGGER);
+                mTransitionManager.Play(goingBackToAR);*/
+                StartCoroutine(ResetAfter(1f));
+                Debug.Log("VAMOS A CAMBIAAAAAAAAR!!!!!!!!!!!!!!!!!");
             }
         }
         else
