@@ -11,6 +11,7 @@ using System.Collections;
 
 public class ViewTrigger : MonoBehaviour
 {
+    [SerializeField] string name;
     public enum TriggerType
     {
         VR_TRIGGER,
@@ -40,6 +41,7 @@ public class ViewTrigger : MonoBehaviour
         cameraTransform = Camera.main.transform;
         mTransitionManager = FindObjectOfType<TransitionManager>();
         GetComponent<Renderer>().material = nonFocusedMaterial;
+        name = gameObject.name;
     }
 
     void Update()
@@ -71,6 +73,36 @@ public class ViewTrigger : MonoBehaviour
                 mTransitionManager.Play(goingBackToAR);*/
                 StartCoroutine(ResetAfter(1f));
                 Debug.Log("VAMOS A CAMBIAAAAAAAAR!!!!!!!!!!!!!!!!!");
+                switch (name)
+                {
+                    case ("ok"):
+                        Debug.Log("esto es " + name);
+                        boarmanager.Instance.ok();
+                        break;
+
+                    case ("left"):
+                        Debug.Log("esto es " + name);
+                        boarmanager.Instance.left();
+                        break;
+
+                    case ("up"):
+                        Debug.Log("esto es " + name);
+                        boarmanager.Instance.up();
+                        break;
+
+                    case ("down"):
+                        Debug.Log("esto es " + name);
+                        boarmanager.Instance.down();
+                        break;
+                    case ("right"):
+                        Debug.Log("esto es " + name);
+                        boarmanager.Instance.right();
+                        break;
+
+
+                    default:
+                        break;
+                }
             }
         }
         else
