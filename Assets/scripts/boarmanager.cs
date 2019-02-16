@@ -20,6 +20,7 @@ public class boarmanager : MonoBehaviour
     //private Quaternion oretation = Quatenion.Euler(0,180,0);
 
     public bool iswhiteturn = true;
+
     #region MONOBEHAVIOUR_METHODS
     private void Start()
     {
