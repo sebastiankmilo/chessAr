@@ -70,15 +70,27 @@ public class boarmanager : MonoBehaviour
     }
     public void down()
     {
-
+        if (selectiony > 0)
+        {
+            selectiony = selectiony - 1;
+            resalto.Instance.hideseleccion();
+        }
     }
     public void left()
     {
-
+        if (selectionx > 0)
+        {
+            selectionx = selectionx - 1;
+            resalto.Instance.hideseleccion();
+        }
     }
     public void right()
     {
-
+        if (selectionx < 7)
+        {
+            selectionx = selectionx + 1;
+            resalto.Instance.hideseleccion();
+        }
     }
 
     #endregion
@@ -133,48 +145,14 @@ public class boarmanager : MonoBehaviour
     private void UpdateSelection()
     {
         //arriba
-        if (Input.GetKeyDown(KeyCode.UpArrow))
-        {
-            /*if (selectiony < 7)
-            {
-                selectiony = selectiony + 1;
-                resalto.Instance.hideseleccion();
-            }*/
-            up();
-                
-        }
+        if (Input.GetKeyDown(KeyCode.UpArrow)) { up(); }
 
         //abajo
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            if (selectiony > 0)
-            {
-                selectiony = selectiony - 1;
-                resalto.Instance.hideseleccion();
-            }
-               
-        }
+        if (Input.GetKeyDown(KeyCode.DownArrow)) { down(); }
         //derecha
-        if (Input.GetKeyDown(KeyCode.RightArrow))
-        {
-            if (selectionx < 7)
-            {
-                selectionx = selectionx + 1;
-                resalto.Instance.hideseleccion();
-            }
-
-                
-        }
+        if (Input.GetKeyDown(KeyCode.RightArrow)) { right(); }
         //left
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
-        {
-            if (selectionx > 0)
-            {
-                selectionx = selectionx - 1;
-                resalto.Instance.hideseleccion();
-            }
-                
-        }
+        if (Input.GetKeyDown(KeyCode.LeftArrow)) {left();}
     }
     private void SpawnChesman(int index, int x, int y)
     {
