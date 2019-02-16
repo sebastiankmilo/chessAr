@@ -15,8 +15,8 @@ public class boarmanager : MonoBehaviour
     public  float Tile_Size() { return TILE_SIZE; }
     public float Tile_Offset() { return TITLE_OFFSET; }
     // que se mestre la valdosa seleccionada
-    private int selectionx = 0;
-    private int selectiony = 0;
+    [SerializeField] private int selectionx = 0;
+    [SerializeField] private int selectiony = 0;
     public List<GameObject> chessmanPrefabs;
     private List<GameObject> activeChessman=new List<GameObject>();
     //private Quaternion oretation = Quatenion.Euler(0,180,0);
