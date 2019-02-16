@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class resalto : MonoBehaviour
 {
+    [SerializeField] GameObject padre;
     public static resalto Instance { set; get; }
     public GameObject highlightsprefab;
     private List<GameObject> highlights;
@@ -27,7 +28,8 @@ public class resalto : MonoBehaviour
     {
         GameObject go = GetHighlightsObjets();
         go.SetActive(true);
-        go.transform.position = new Vector3(x + 0.5f, 0.05f, y + 0.5f);
+        go.transform.SetParent(padre.transform);
+        go.transform.localPosition = new Vector3(x* boarmanager.Instance.Tile_Size() + boarmanager.Instance.Tile_Offset(), 0.05f, y*boarmanager.Instance.Tile_Size() + boarmanager.Instance.Tile_Offset());
 
     }
     public void hideseleccion()

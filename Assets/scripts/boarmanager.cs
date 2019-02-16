@@ -12,6 +12,8 @@ public class boarmanager : MonoBehaviour
 
     [SerializeField] private const float TILE_SIZE = 1.25f; // tamaño de la valdosa
     [SerializeField] private const float TITLE_OFFSET = 0.625f; // la mitad de la valdosa
+    public  float Tile_Size() { return TILE_SIZE; }
+    public float Tile_Offset() { return TITLE_OFFSET; }
     // que se mestre la valdosa seleccionada
     private int selectionx = 0;
     private int selectiony = 0;
@@ -54,7 +56,7 @@ public class boarmanager : MonoBehaviour
             else
             {
                 //move chessman
-                //movechessman(selectionx, selectiony);
+                movechessman(selectionx, selectiony);
             }
         }
     }
@@ -77,7 +79,7 @@ public class boarmanager : MonoBehaviour
 
 
     }
-    /*
+    
     private void movechessman(int x, int y)
     {
         if (allowedmoves[x, y])
@@ -106,7 +108,7 @@ public class boarmanager : MonoBehaviour
         boardhightlights.Instance.hidehighlights();
         selectedchessman = null;
     }
-    */
+    
     private void UpdateSelection()
     {
         //arriba
