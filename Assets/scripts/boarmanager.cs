@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class boarmanager : MonoBehaviour
 {
+    [SerializeField] GameObject padre;
     public static boarmanager Instance { set; get; }
     private bool[,] allowedmoves { set; get; }  
     public chessman [,] chessmans { set; get; }
@@ -49,7 +50,7 @@ public class boarmanager : MonoBehaviour
             else
             {
                 //move chessman
-                movechessman(selectionx, selectiony);
+                //movechessman(selectionx, selectiony);
             }
         }
     }
@@ -70,13 +71,14 @@ public class boarmanager : MonoBehaviour
 
 
     }
-    private void movechessman(int x,int y)
+    /*
+    private void movechessman(int x, int y)
     {
-       if(allowedmoves[x,y])
+        if (allowedmoves[x, y])
         {
-            chessman c = chessmans[x,y];
+            chessman c = chessmans[x, y];
 
-            if(c !=null && c.iswhite != iswhiteturn)
+            if (c != null && c.iswhite != iswhiteturn)
             {
                 // capture pieza
                 // si es el rey
@@ -88,7 +90,7 @@ public class boarmanager : MonoBehaviour
                 activeChessman.Remove(c.gameObject);
                 Destroy(c.gameObject);
             }
-            chessmans [selectedchessman.Currentx, selectedchessman.Currenty] = null;
+            chessmans[selectedchessman.Currentx, selectedchessman.Currenty] = null;
             selectedchessman.transform.position = GetTileCenter(x, y);
             selectedchessman.setposition(x, y);
             chessmans[x, y] = selectedchessman;
@@ -97,8 +99,8 @@ public class boarmanager : MonoBehaviour
 
         boardhightlights.Instance.hidehighlights();
         selectedchessman = null;
-
     }
+    */
     private void UpdateSelection()
     {
         //arriba
