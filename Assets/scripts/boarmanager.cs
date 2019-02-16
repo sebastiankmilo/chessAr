@@ -60,6 +60,27 @@ public class boarmanager : MonoBehaviour
             }
         }
     }
+    public void up()
+    {
+        if (selectiony < 7)
+        {
+            selectiony = selectiony + 1;
+            resalto.Instance.hideseleccion();
+        }
+    }
+    public void down()
+    {
+
+    }
+    public void left()
+    {
+
+    }
+    public void right()
+    {
+
+    }
+
     #endregion
     #region PRIVATE_METHODS
     private void selectchessman(int x,int y)
@@ -114,11 +135,12 @@ public class boarmanager : MonoBehaviour
         //arriba
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
-            if (selectiony < 7)
+            /*if (selectiony < 7)
             {
                 selectiony = selectiony + 1;
                 resalto.Instance.hideseleccion();
-            }
+            }*/
+            up();
                 
         }
 
