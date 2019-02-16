@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class boardhightlights : MonoBehaviour
 {
+    [SerializeField] GameObject padre;
     public static boardhightlights Instance { set; get; }
     public GameObject highlightsprefab;
     private List<GameObject> highlights;
@@ -32,8 +33,10 @@ public class boardhightlights : MonoBehaviour
                 if (moves[i, j])
                 {
                     GameObject go = GetHighlightsObjets();
-                    go.SetActive(true);
-                    go.transform.position = new Vector3(i+0.5f, 0.05f, j+0.5f);
+                    go.SetActive(true);                    
+                    go.transform.SetParent(padre.transform);
+                    go.transform.localRotation= Quaternion.Euler(0, 0, 0);
+                    go.transform.localPosition = new Vector3(i * boarmanager.Instance.Tile_Size() + boarmanager.Instance.Tile_Offset(), 0.05f, j * boarmanager.Instance.Tile_Size() + boarmanager.Instance.Tile_Offset());
 
                 }
             }

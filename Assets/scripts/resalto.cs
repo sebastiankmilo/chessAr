@@ -29,6 +29,7 @@ public class resalto : MonoBehaviour
         GameObject go = GetHighlightsObjets();
         go.SetActive(true);
         go.transform.SetParent(padre.transform);
+        go.transform.localRotation = Quaternion.Euler(0, 0, 0);
         go.transform.localPosition = new Vector3(x* boarmanager.Instance.Tile_Size() + boarmanager.Instance.Tile_Offset(), 0.05f, y*boarmanager.Instance.Tile_Size() + boarmanager.Instance.Tile_Offset());
 
     }

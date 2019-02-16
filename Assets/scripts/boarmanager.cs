@@ -7,8 +7,8 @@ public class boarmanager : MonoBehaviour
     [SerializeField] GameObject padre;
     public static boarmanager Instance { set; get; }
     private bool[,] allowedmoves { set; get; }  
-    public chessman [,] chessmans { set; get; }
-    private chessman selectedchessman;
+    public chessman [,] chessmans { set; get; } //holds information about the positions of figures on the board
+    [SerializeField] private chessman selectedchessman; 
 
     [SerializeField] private const float TILE_SIZE = 1.25f; // tamaño de la valdosa
     [SerializeField] private const float TITLE_OFFSET = 0.625f; // la mitad de la valdosa
@@ -18,7 +18,7 @@ public class boarmanager : MonoBehaviour
     [SerializeField] private int selectionx = 0;
     [SerializeField] private int selectiony = 0;
     public List<GameObject> chessmanPrefabs;
-    private List<GameObject> activeChessman=new List<GameObject>();
+    [SerializeField] private List<GameObject> activeChessman=new List<GameObject>(); //list of the type GameObject, used to keep track of all characters that are currently alive.
     //private Quaternion oretation = Quatenion.Euler(0,180,0);
 
     public bool iswhiteturn = true;
@@ -51,12 +51,14 @@ public class boarmanager : MonoBehaviour
             if (selectedchessman == null)
             {
                 // seleccion de ficha
+                Debug.Log("Se seleciono la ficha");
                 selectchessman(selectionx, selectiony);
             }
             else
             {
                 //move chessman
                 movechessman(selectionx, selectiony);
+                Debug.Log("Se Movio la ficha");
             }
         }
     }
@@ -98,9 +100,15 @@ public class boarmanager : MonoBehaviour
     private void selectchessman(int x,int y)
     {
         if (chessmans[x, y] == null)
+        {
+            Debug.Log("Chessmans es nulo");
             return;
+        }
         if (chessmans[x, y].iswhite != iswhiteturn)
+        {
+            Debug.Log("No es el turno de la ficha");
             return;
+        }
         bool hasatleastonemove = false;
         allowedmoves = chessmans[x, y].possiblemove();
         for (int i = 0; i < 8; i++)
@@ -109,6 +117,7 @@ public class boarmanager : MonoBehaviour
                     hasatleastonemove = true;
         selectedchessman = chessmans[x, y];
         boardhightlights.Instance.highlightallowedmoves(allowedmoves);
+        Debug.Log("Se ha elegido una ficha");
 
 
     }
@@ -132,7 +141,7 @@ public class boarmanager : MonoBehaviour
                 Destroy(c.gameObject);
             }
             chessmans[selectedchessman.Currentx, selectedchessman.Currenty] = null;
-            selectedchessman.transform.position = GetTileCenter(x, y);
+            selectedchessman.transform.localPosition = GetTileCenter(x, y);
             selectedchessman.setposition(x, y);
             chessmans[x, y] = selectedchessman;
             iswhiteturn = !iswhiteturn;
