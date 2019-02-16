@@ -10,8 +10,8 @@ public class boarmanager : MonoBehaviour
     public chessman [,] chessmans { set; get; }
     private chessman selectedchessman;
 
-    private const float TILE_SIZE = 1.0f; // tamaño de la valdosa
-    private const float TITLE_OFFSET = 0.5f; // la mitad de la valdosa
+    [SerializeField] private const float TILE_SIZE = 1.25f; // tamaño de la valdosa
+    [SerializeField] private const float TITLE_OFFSET = 0.625f; // la mitad de la valdosa
     // que se mestre la valdosa seleccionada
     private int selectionx = 0;
     private int selectiony = 0;
@@ -154,9 +154,10 @@ public class boarmanager : MonoBehaviour
     }
     private void SpawnChesman(int index, int x, int y)
     {
-        GameObject go = Instantiate(chessmanPrefabs[index], GetTileCenter(x,y), Quaternion.identity) as GameObject;
+        GameObject go = Instantiate(chessmanPrefabs[index], GetTileCenter(x, y), Quaternion.identity) as GameObject;
 
-        go.transform.SetParent(transform);
+        go.transform.SetParent(padre.transform);
+        go.transform.localPosition = GetTileCenter(x, y);
         chessmans[x, y] = go.GetComponent<chessman>();
         chessmans[x, y].setposition(x,y);
         activeChessman.Add(go);
@@ -206,8 +207,8 @@ public class boarmanager : MonoBehaviour
     private Vector3 GetTileCenter(int x,int y)
     {
         Vector3 origin = Vector3.zero;
-        origin.x += (TILE_SIZE * x) + TITLE_OFFSET;
-        origin.z += (TILE_SIZE * y) + TITLE_OFFSET;
+        origin.x += ((TILE_SIZE * x) + TITLE_OFFSET)*1f;
+        origin.z += ((TILE_SIZE * y) + TITLE_OFFSET)*1f;
         return origin;
     }
     private void Drawchessboard()
@@ -252,4 +253,5 @@ public class boarmanager : MonoBehaviour
         SpawnAllChessman();
     }
     #endregion
+
 }
