@@ -20,6 +20,7 @@ public class boarmanager : MonoBehaviour
     //private Quaternion oretation = Quatenion.Euler(0,180,0);
 
     public bool iswhiteturn = true;
+    #region MONOBEHAVIOUR_METHODS
     private void Start()
     {
         Instance = this;
@@ -37,6 +38,8 @@ public class boarmanager : MonoBehaviour
         }
 
     }
+    #endregion
+    #region PUBLIC_METHODS
     public void ok()
     {
 
@@ -54,6 +57,8 @@ public class boarmanager : MonoBehaviour
             }
         }
     }
+    #endregion
+    #region PRIVATE_METHODS
     private void selectchessman(int x,int y)
     {
         if (chessmans[x, y] == null)
@@ -245,5 +250,5 @@ public class boarmanager : MonoBehaviour
         boardhightlights.Instance.hidehighlights();
         SpawnAllChessman();
     }
-
+    #endregion
 }
