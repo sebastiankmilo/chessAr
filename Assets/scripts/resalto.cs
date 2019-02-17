@@ -6,7 +6,7 @@ public class resalto : MonoBehaviour
     [SerializeField] GameObject padre;
     public static resalto Instance { set; get; }
     public GameObject highlightsprefab;
-    private List<GameObject> highlights;
+    [SerializeField] private List<GameObject> highlights;
 
     private void Start()
     {
@@ -16,6 +16,17 @@ public class resalto : MonoBehaviour
     private GameObject GetHighlightsObjets()
     {
         GameObject go = highlights.Find(g => !g.activeSelf);
+        try
+        {
+            
+            go = highlights[0];
+        }
+        catch (System.Exception)
+        {
+            go = Instantiate(highlightsprefab);
+            highlights.Add(go);
+            throw;
+        }
         if (go == null)
         {
             go = Instantiate(highlightsprefab);
@@ -35,8 +46,17 @@ public class resalto : MonoBehaviour
     }
     public void hideseleccion()
     {
-        foreach (GameObject go in highlights)
-            go.SetActive(false);
+        try
+        {
+            foreach (GameObject go in highlights)
+                go.SetActive(false);
+        }
+        catch (System.Exception)
+        {
+
+            Debug.Log("paso algo xD");
+        }
+       
     }
 
 }
