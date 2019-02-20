@@ -20,7 +20,10 @@ public class boarmanager : MonoBehaviour
     public List<GameObject> chessmanPrefabs;
     [SerializeField] private List<GameObject> activeChessman=new List<GameObject>(); //list of the type GameObject, used to keep track of all characters that are currently alive.
     //private Quaternion oretation = Quatenion.Euler(0,180,0);
-
+    int n = 1;
+    int t = 1;
+    int k = 1;
+    int b = 1;
     public bool iswhiteturn = true;
 
     #region MONOBEHAVIOUR_METHODS
@@ -109,15 +112,20 @@ public class boarmanager : MonoBehaviour
             Debug.Log("No es el turno de la ficha");
             return;
         }
-        bool hasatleastonemove = false;
-        allowedmoves = chessmans[x, y].possiblemove();
-        for (int i = 0; i < 8; i++)
-            for (int j = 0; j < 8; j++)
-                if (allowedmoves[i, j])
-                    hasatleastonemove = true;
-        selectedchessman = chessmans[x, y];
-        boardhightlights.Instance.highlightallowedmoves(allowedmoves);
-        Debug.Log("Se ha elegido una ficha");
+        if (chessmans[x, y].iswhite != jugadores.player.remoto) //remoto false, el jugador local es blanco
+        {
+
+            bool hasatleastonemove = false;
+            allowedmoves = chessmans[x, y].possiblemove();
+            for (int i = 0; i < 8; i++)
+                for (int j = 0; j < 8; j++)
+                    if (allowedmoves[i, j])
+                        hasatleastonemove = true;
+            selectedchessman = chessmans[x, y];
+            boardhightlights.Instance.highlightallowedmoves(allowedmoves);
+            Debug.Log("Se ha elegido una ficha");
+        }
+
 
 
     }
@@ -166,7 +174,42 @@ public class boarmanager : MonoBehaviour
     private void SpawnChesman(int index, int x, int y)
     {
         GameObject go = Instantiate(chessmanPrefabs[index], GetTileCenter(x, y), Quaternion.identity) as GameObject;
-
+        if (go.name.Contains("pawn"))
+        {
+            go.name = go.name + n.ToString();
+            n++;
+            if (n == 9)
+            {
+                n = 1;
+            }
+        }
+        if (go.name.Contains("rook"))
+        {
+            go.name = go.name + t.ToString();
+            t++;
+            if (t == 3)
+            {
+                t = 1;
+            }
+        }
+        if (go.name.Contains("bishop"))
+        {
+            go.name = go.name + b.ToString();
+            b++;
+            if (b == 3)
+            {
+                b = 1;
+            }
+        }
+        if (go.name.Contains("knight"))
+        {
+            go.name = go.name + k.ToString();
+            k++;
+            if (k == 3)
+            {
+                k = 1;
+            }
+        }
         go.transform.SetParent(padre.transform);
         go.transform.localPosition = GetTileCenter(x, y);
         chessmans[x, y] = go.GetComponent<chessman>();

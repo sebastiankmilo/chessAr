@@ -1,0 +1,135 @@
+{
+  "project_info": {
+    "project_number": "701085223667",
+    "firebase_url": "https://ajedrez-23.firebaseio.com",
+    "project_id": "ajedrez-23",
+    "storage_bucket": "ajedrez-23.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:701085223667:android:1cbe159a63c915d8",
+        "android_client_info": {
+          "package_name": "com.aplicacionesmoviles.chessAr"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "701085223667-11orgt9dak6tqdtfld6dd5lb9nnd9q8r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDxEAy1icKkTBKcu4vd3Ls243yExhbhdU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:701085223667:android:ac9fe19635d7fef0",
+        "android_client_info": {
+          "package_name": "com.dirno.firebaseajedrez"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "701085223667-11orgt9dak6tqdtfld6dd5lb9nnd9q8r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDxEAy1icKkTBKcu4vd3Ls243yExhbhdU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:701085223667:android:a9d5787364e9f11a",
+        "android_client_info": {
+          "package_name": "com.diurno.ajedrez"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "701085223667-11orgt9dak6tqdtfld6dd5lb9nnd9q8r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDxEAy1icKkTBKcu4vd3Ls243yExhbhdU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:701085223667:android:6ce07fce7aad2ec7",
+        "android_client_info": {
+          "package_name": "com.vuforia.engine.VRUnity"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "701085223667-11orgt9dak6tqdtfld6dd5lb9nnd9q8r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDxEAy1icKkTBKcu4vd3Ls243yExhbhdU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
