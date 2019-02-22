@@ -31,6 +31,7 @@ namespace Firebase.Sample.Auth {
     [SerializeField] InputField contraseña2;
     [SerializeField] Text mensaje;
         [SerializeField] GameObject[] botones=new GameObject[3];
+        bool configurado = false;
     public static UIHandler instance;
         /// <summary>
         /// objetos padre, que contiene de todas las formas para autentificarse y sus posibles errores
@@ -81,26 +82,25 @@ namespace Firebase.Sample.Auth {
     // When the app starts, check to make sure that we have
     // the required dependencies to use Firebase, and if not,
     // add them if possible.
-    public virtual void Start() {          
-           
-        Firebase.FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task => {
-        dependencyStatus = task.Result;
-        if (dependencyStatus == Firebase.DependencyStatus.Available) {
-            InitializeFirebase();
-        } else {
+    public virtual void Start() {
+            Firebase.FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task => {
+            dependencyStatus = task.Result;
+            if (dependencyStatus == Firebase.DependencyStatus.Available) {
+            InitializeFirebase();                    
+            }
+            else
+            {
             Debug.LogError(
             "Could not resolve all Firebase dependencies: " + dependencyStatus);
-        }
-        }); // instala lo necesario para que firebase funcione.
+            }
+            }); // instala lo necesario para que firebase funcione.
             instance = this;
     }
 
     // Handle initialization of the necessary firebase modules:
     protected void InitializeFirebase() {
-            /*foreach (GameObject item in botones)
-            {
-                item.SetActive(false);
-            }*/
+            
+            Debug.Log("Setting up Firebase Auth");
             DebugLog("Setting up Firebase Auth");
             auth = Firebase.Auth.FirebaseAuth.DefaultInstance; //inicializo auth
             auth.StateChanged += AuthStateChanged; //subscribo el evento AuthStateChanged a el evento StateChange de auth.
@@ -120,11 +120,11 @@ namespace Firebase.Sample.Auth {
             }
             }
             AuthStateChanged(this, null);
+
             Debug.Log("Configurado");
-            /*foreach (GameObject item in botones)
-            {
-                item.SetActive(true);
-            }*/
+            configurado = true;
+
+            
         }
 
     // Exit if escape (or back, on mobile) is pressed.
@@ -311,8 +311,16 @@ namespace Firebase.Sample.Auth {
 
         public void CrearUsuarioConCorreo()
         {
-            Debug.Log("Creando cuenta");
-            CreateUserWithEmailAsync();
+            if (configurado)
+            {
+                Debug.Log("Creando cuenta");
+                CreateUserWithEmailAsync();
+            }
+            else
+            {
+                mensaje.text = "espere que se configure";
+            }
+            
             
         }
 
@@ -375,7 +383,15 @@ namespace Firebase.Sample.Auth {
     }
         public void CrearCuentaAnonima()
         {
-            SigninAnonymouslyAsync();
+            if (configurado)
+            {
+                SigninAnonymouslyAsync();
+            }
+            else
+            {
+                mensaje.text="espere que se configur";
+            }
+            
         }
     
 
@@ -721,21 +737,37 @@ namespace Firebase.Sample.Auth {
         {
             displayName = nombre.text;
             email = correo.text;
-            if (String.IsNullOrEmpty(contraseña.text) ||
+            if (configurado)
+            {   
+                mensaje.color = new Color(0.1960784f, 0.1960784f, 0.1960784f);
+                if (auth.CurrentUser==null)
+                {
+                    if (String.IsNullOrEmpty(contraseña.text) ||
                      String.IsNullOrEmpty(contraseña2.text))
-            {
-                mensaje.text = "espacios vacios";
-                password = "";
-            }
-            else if (contraseña.text == contraseña2.text)
-            {
-                password = contraseña.text;
-                mensaje.text = "coinciden";
+                    {
+                        mensaje.text = "espacios vacios";
+                        password = "";
+                        logText = mensaje.text;
+                    }
+                    else if (contraseña.text == contraseña2.text)
+                    {
+                        password = contraseña.text;
+                        mensaje.text = "coinciden";
+                        logText = mensaje.text;
+                    }
+                    else
+                    {
+                        mensaje.text = "las contraseñas no coinciden";
+                        password = "";
+                        logText = mensaje.text;
+                    }
+                }
+                
             }
             else
             {
-                mensaje.text = "las contraseñas no coinciden";
-                password = "";
+                mensaje.color = new Color(255, 0, 0);
+                mensaje.text = "espere que se configure";
             }
 
         }
