@@ -30,6 +30,7 @@ namespace Firebase.Sample.Auth {
     [SerializeField] InputField contraseña;
     [SerializeField] InputField contraseña2;
     [SerializeField] Text mensaje;
+        [SerializeField] GameObject[] botones=new GameObject[3];
     public static UIHandler instance;
         /// <summary>
         /// objetos padre, que contiene de todas las formas para autentificarse y sus posibles errores
@@ -80,41 +81,51 @@ namespace Firebase.Sample.Auth {
     // When the app starts, check to make sure that we have
     // the required dependencies to use Firebase, and if not,
     // add them if possible.
-    public virtual void Start() {
-      Firebase.FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task => {
+    public virtual void Start() {          
+           
+        Firebase.FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task => {
         dependencyStatus = task.Result;
         if (dependencyStatus == Firebase.DependencyStatus.Available) {
-          InitializeFirebase();
+            InitializeFirebase();
         } else {
-          Debug.LogError(
+            Debug.LogError(
             "Could not resolve all Firebase dependencies: " + dependencyStatus);
         }
-      }); // instala lo necesario para que firebase funcione.
+        }); // instala lo necesario para que firebase funcione.
             instance = this;
     }
 
     // Handle initialization of the necessary firebase modules:
     protected void InitializeFirebase() {
-      DebugLog("Setting up Firebase Auth");
-      auth = Firebase.Auth.FirebaseAuth.DefaultInstance; //inicializo auth
-      auth.StateChanged += AuthStateChanged; //subscribo el evento AuthStateChanged a el evento StateChange de auth.
-      auth.IdTokenChanged += IdTokenChanged;  //subscribo el evento IdTokenChange a el evento IdTokenChanged de auth.
-    // Specify valid options to construct a secondary authentication object. //inicializo otherAuth, si no esta inicializada
-            if (otherAuthOptions != null &&
-          !(String.IsNullOrEmpty(otherAuthOptions.ApiKey) ||
-            String.IsNullOrEmpty(otherAuthOptions.AppId) ||
-            String.IsNullOrEmpty(otherAuthOptions.ProjectId))) {
-        try {
-          otherAuth = Firebase.Auth.FirebaseAuth.GetAuth(Firebase.FirebaseApp.Create(
-            otherAuthOptions, "Secondary"));
-          otherAuth.StateChanged += AuthStateChanged;
-          otherAuth.IdTokenChanged += IdTokenChanged;
-        } catch (Exception) {
-          DebugLog("ERROR: Failed to initialize secondary authentication object.");
+            /*foreach (GameObject item in botones)
+            {
+                item.SetActive(false);
+            }*/
+            DebugLog("Setting up Firebase Auth");
+            auth = Firebase.Auth.FirebaseAuth.DefaultInstance; //inicializo auth
+            auth.StateChanged += AuthStateChanged; //subscribo el evento AuthStateChanged a el evento StateChange de auth.
+            auth.IdTokenChanged += IdTokenChanged;  //subscribo el evento IdTokenChange a el evento IdTokenChanged de auth.
+            // Specify valid options to construct a secondary authentication object. //inicializo otherAuth, si no esta inicializada
+                if (otherAuthOptions != null &&
+                !(String.IsNullOrEmpty(otherAuthOptions.ApiKey) ||
+                String.IsNullOrEmpty(otherAuthOptions.AppId) ||
+                String.IsNullOrEmpty(otherAuthOptions.ProjectId))) {
+            try {
+                otherAuth = Firebase.Auth.FirebaseAuth.GetAuth(Firebase.FirebaseApp.Create(
+                otherAuthOptions, "Secondary"));
+                otherAuth.StateChanged += AuthStateChanged;
+                otherAuth.IdTokenChanged += IdTokenChanged;
+            } catch (Exception) {
+                DebugLog("ERROR: Failed to initialize secondary authentication object.");
+            }
+            }
+            AuthStateChanged(this, null);
+            Debug.Log("Configurado");
+            /*foreach (GameObject item in botones)
+            {
+                item.SetActive(true);
+            }*/
         }
-      }
-      AuthStateChanged(this, null);
-    }
 
     // Exit if escape (or back, on mobile) is pressed.
     protected virtual void Update() {
@@ -155,7 +166,7 @@ namespace Firebase.Sample.Auth {
         int index = logText.IndexOf("\n");
         logText = logText.Substring(index + 1);
       }
-      scrollViewVector.y = int.MaxValue;
+      //scrollViewVector.y = int.MaxValue;
     }
 
     // Display additional user profile information.
@@ -595,7 +606,8 @@ namespace Firebase.Sample.Auth {
     // Render the log output in a scroll view.
     void GUIDisplayLog() {
       scrollViewVector = GUILayout.BeginScrollView(scrollViewVector);
-      GUILayout.Label(logText);
+      //GUILayout.Label(logText);
+            mensaje.text = logText;
       GUILayout.EndScrollView();
     }
     
