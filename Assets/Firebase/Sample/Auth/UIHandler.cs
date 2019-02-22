@@ -15,15 +15,27 @@
 namespace Firebase.Sample.Auth {
   using System;
   using System.Collections.Generic;
+    using UnityEngine.UI;
   using System.Threading.Tasks;
   using UnityEngine;
 
   // Handler for UI buttons on the scene.  Also performs some
   // necessary setup (initializing the firebase app, etc) on
   // startup.
-  public class UIHandler : MonoBehaviour {
-    protected Firebase.Auth.FirebaseAuth auth;
-    protected Firebase.Auth.FirebaseAuth otherAuth;
+  public class UIHandler : MonoBehaviour
+{
+
+    [SerializeField] InputField nombre;
+    [SerializeField] InputField correo;
+    [SerializeField] InputField contraseña;
+    [SerializeField] InputField contraseña2;
+    [SerializeField] Text mensaje;
+    public static UIHandler instance;
+        /// <summary>
+        /// objetos padre, que contiene de todas las formas para autentificarse y sus posibles errores
+        /// </summary>
+        protected Firebase.Auth.FirebaseAuth auth;
+        protected Firebase.Auth.FirebaseAuth otherAuth;
     protected Dictionary<string, Firebase.Auth.FirebaseUser> userByAuth =
       new Dictionary<string, Firebase.Auth.FirebaseUser>();
 
@@ -45,10 +57,13 @@ namespace Firebase.Sample.Auth {
     public bool usePasswordInput = false;
     private Vector2 controlsScrollViewVector = Vector2.zero;
     private Vector2 scrollViewVector = Vector2.zero;
-    bool UIEnabled = true;
+        /// <summary>
+        /// la que controla, si se dibuja o no la GUI
+        /// </summary>
+        bool UIEnabled = true;
 
-    // Set the phone authentication timeout to a minute.
-    private uint phoneAuthTimeoutMs = 60 * 1000;
+        // Set the phone authentication timeout to a minute.
+        private uint phoneAuthTimeoutMs = 60 * 1000;
     // The verification id needed along with the sent code for phone authentication.
     private string phoneAuthVerificationId;
 
@@ -75,6 +90,7 @@ namespace Firebase.Sample.Auth {
             "Could not resolve all Firebase dependencies: " + dependencyStatus);
         }
       }); // instala lo necesario para que firebase funcione.
+            instance = this;
     }
 
     // Handle initialization of the necessary firebase modules:
@@ -118,17 +134,21 @@ namespace Firebase.Sample.Auth {
       }
     }
 
-    void DisableUI() {
-      UIEnabled = false;
-    }
+        /// <summary>
+        /// vuelve falsa la variable UIEnabled
+        /// </summary>
+        void DisableUI()
+        {
+            UIEnabled = false;
+        }
 
-    void EnableUI() {
+        void EnableUI() {
       UIEnabled = true;
     }
 
     // Output text to the debug log text field, as well as the console.
     public void DebugLog(string s) {
-      Debug.Log(s);
+ 
       logText += s + "\n";
 
       while (logText.Length > kMaxLogSize) {
@@ -278,6 +298,13 @@ namespace Firebase.Sample.Auth {
         }).Unwrap();
     }
 
+        public void CrearUsuarioConCorreo()
+        {
+            Debug.Log("Creando cuenta");
+            CreateUserWithEmailAsync();
+            
+        }
+
     // Update the user's display name with the currently selected display name.
     public Task UpdateUserProfileAsync(string newDisplayName = null) {
       if (auth.CurrentUser == null) {
@@ -335,10 +362,11 @@ namespace Firebase.Sample.Auth {
       DisableUI();
       return auth.SignInAnonymouslyAsync().ContinueWith(HandleSignInWithUser);
     }
-    public void SigninAnonymouslyAsyncc()
+        public void CrearCuentaAnonima()
         {
             SigninAnonymouslyAsync();
         }
+    
 
     // Called when a sign-in without fetching profile data completes.
         void HandleSignInWithUser(Task<Firebase.Auth.FirebaseUser> task) {
@@ -570,7 +598,7 @@ namespace Firebase.Sample.Auth {
       GUILayout.Label(logText);
       GUILayout.EndScrollView();
     }
-    /*
+    
     // Render the buttons and other controls.
     void GUIDisplayControls() {
       if (UIEnabled) {
@@ -675,37 +703,59 @@ namespace Firebase.Sample.Auth {
         GUILayout.EndScrollView();
       }
     }
-    */
+    
     // Overridable function to allow additional controls to be added.
-    protected virtual void GUIDisplayCustomControls() { }
+    protected virtual void GUIDisplayCustomControls()
+        {
+            displayName = nombre.text;
+            email = correo.text;
+            if (String.IsNullOrEmpty(contraseña.text) ||
+                     String.IsNullOrEmpty(contraseña2.text))
+            {
+                mensaje.text = "espacios vacios";
+                password = "";
+            }
+            else if (contraseña.text == contraseña2.text)
+            {
+                password = contraseña.text;
+                mensaje.text = "coinciden";
+            }
+            else
+            {
+                mensaje.text = "las contraseñas no coinciden";
+                password = "";
+            }
+
+        }
 
     // Render the GUI:
     void OnGUI() {
-      GUI.skin = fb_GUISkin;
-      if (dependencyStatus != Firebase.DependencyStatus.Available) {
+        GUI.skin = fb_GUISkin;
+        if (dependencyStatus != Firebase.DependencyStatus.Available) {
         GUILayout.Label("One or more Firebase dependencies are not present.");
         GUILayout.Label("Current dependency status: " + dependencyStatus.ToString());
         return;
-      }
-      Rect logArea, controlArea;
+        }
+        Rect logArea, controlArea;
 
-      if (Screen.width < Screen.height) {
+        if (Screen.width < Screen.height) {
         // Portrait mode
         controlArea = new Rect(0.0f, 0.0f, Screen.width, Screen.height * 0.5f);
         logArea = new Rect(0.0f, Screen.height * 0.5f, Screen.width, Screen.height * 0.5f);
-      } else {
+        } else {
         // Landscape mode
         controlArea = new Rect(0.0f, 0.0f, Screen.width * 0.5f, Screen.height);
         logArea = new Rect(Screen.width * 0.5f, 0.0f, Screen.width * 0.5f, Screen.height);
-      }
+        }
+        GUIDisplayCustomControls();
 
-      GUILayout.BeginArea(logArea);
-      GUIDisplayLog();
-      GUILayout.EndArea();
+        GUILayout.BeginArea(logArea);
+        GUIDisplayLog();
+        GUILayout.EndArea();
 
-      GUILayout.BeginArea(controlArea);
-      //GUIDisplayControls();
-      GUILayout.EndArea();
+        GUILayout.BeginArea(controlArea);
+        //GUIDisplayControls();
+        GUILayout.EndArea();
     }
   }
 }
