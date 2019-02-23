@@ -13,33 +13,36 @@
 // limitations under the License.
 
 namespace Firebase.Sample.Auth {
-  using System;
-  using System.Collections.Generic;
+    using System;
+    using System.Collections.Generic;
     using UnityEngine.UI;
-  using System.Threading.Tasks;
-  using UnityEngine;
+    using System.Threading.Tasks;
+    using UnityEngine;
+    using UnityEngine.SceneManagement;
 
-  // Handler for UI buttons on the scene.  Also performs some
-  // necessary setup (initializing the firebase app, etc) on
-  // startup.
-  public class UIHandler : MonoBehaviour
-{
+    // Handler for UI buttons on the scene.  Also performs some
+    // necessary setup (initializing the firebase app, etc) on
+    // startup.
+    public class UIHandler : MonoBehaviour
+    {
 
-    [SerializeField] InputField nombre;
-    [SerializeField] InputField correo;
-    [SerializeField] InputField contraseña;
-    [SerializeField] InputField contraseña2;
-    [SerializeField] Text mensaje;
-        [SerializeField] GameObject[] botones=new GameObject[3];
+        [SerializeField] InputField nombre;
+        [SerializeField] InputField correo;
+        [SerializeField] InputField contraseña;
+        [SerializeField] InputField contraseña2;
+        [SerializeField] Text mensaje;
+        [SerializeField] GameObject[] botones = new GameObject[3];
         bool configurado = false;
-    public static UIHandler instance;
+        public static UIHandler instance;
         /// <summary>
         /// objetos padre, que contiene de todas las formas para autentificarse y sus posibles errores
         /// </summary>
         protected Firebase.Auth.FirebaseAuth auth;
         protected Firebase.Auth.FirebaseAuth otherAuth;
-    protected Dictionary<string, Firebase.Auth.FirebaseUser> userByAuth =
-      new Dictionary<string, Firebase.Auth.FirebaseUser>();
+        protected Dictionary<string, Firebase.Auth.FirebaseUser> userByAuth =
+          new Dictionary<string, Firebase.Auth.FirebaseUser>();
+        public Firebase.Auth.FirebaseAuth usuario { 
+        get { return auth; } }
 
     public GUISkin fb_GUISkin;
     private string logText = "";
@@ -134,7 +137,7 @@ namespace Firebase.Sample.Auth {
       }
     }
 
-    void OnDestroy() {
+    /*void OnDestroy() {
       auth.StateChanged -= AuthStateChanged;
       auth.IdTokenChanged -= IdTokenChanged;
       auth = null;
@@ -143,7 +146,21 @@ namespace Firebase.Sample.Auth {
         otherAuth.IdTokenChanged -= IdTokenChanged;
         otherAuth = null;
       }
-    }
+            Debug.Log("se salio");
+    }*/
+    void OnApplicationQuit()
+        {
+            auth.StateChanged -= AuthStateChanged;
+            auth.IdTokenChanged -= IdTokenChanged;
+            auth = null;
+            if (otherAuth != null)
+            {
+                otherAuth.StateChanged -= AuthStateChanged;
+                otherAuth.IdTokenChanged -= IdTokenChanged;
+                otherAuth = null;
+            }
+            Debug.Log("se salio");
+        }
 
         /// <summary>
         /// vuelve falsa la variable UIEnabled
@@ -166,6 +183,7 @@ namespace Firebase.Sample.Auth {
         int index = logText.IndexOf("\n");
         logText = logText.Substring(index + 1);
       }
+            Debug.Log(logText);
       //scrollViewVector.y = int.MaxValue;
     }
 
@@ -357,6 +375,12 @@ namespace Firebase.Sample.Auth {
           .ContinueWith(HandleSignInWithUser);
       }
     }
+        public void LoguearConCorreo()
+        {
+            password = contraseña.text;
+            SigninWithEmailAsync();
+
+        }
 
     // This is functionally equivalent to the Signin() function.  However, it
     // illustrates the use of Credentials, which can be aquired from many
@@ -400,7 +424,8 @@ namespace Firebase.Sample.Auth {
       EnableUI();
       if (LogTaskCompletion(task, "Sign-in")) {
         DebugLog(String.Format("{0} signed in", task.Result.DisplayName));
-      }
+                Debug.Log("conectado");
+            }
     }
 
     // Called when a sign-in with profile data completes.
@@ -408,6 +433,7 @@ namespace Firebase.Sample.Auth {
       EnableUI();
       if (LogTaskCompletion(task, "Sign-in")) {
         DisplaySignInResult(task.Result, 1);
+                Debug.Log("conectado");
       }
     }
 
@@ -761,6 +787,10 @@ namespace Firebase.Sample.Auth {
                         password = "";
                         logText = mensaje.text;
                     }
+                }
+                else
+                {
+                    SceneManager.LoadScene(1, LoadSceneMode.Single);
                 }
                 
             }
