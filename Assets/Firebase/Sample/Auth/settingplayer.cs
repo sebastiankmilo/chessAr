@@ -13,7 +13,7 @@ public class settingplayer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        token.text = UIHandler.instance.usuario.CurrentUser.UserId;// ProviderId;
+        //token.text = UIHandler.instance.usuario.CurrentUser.UserId;// ProviderId;
     }
 
     // Update is called once per frame
