@@ -41,6 +41,8 @@ namespace Firebase.Sample.Database {
         private string email = "";
         private int score = 100;
         private string playerNAme = "";
+        private string color = "";
+        private string tableroNAme = "";
         protected bool UIEnabled = true;
 
         const int kMaxLogSize = 16382;
@@ -132,7 +134,7 @@ namespace Firebase.Sample.Database {
 
             if (leaders == null) {
             leaders = new List<object>();
-            }/* else if (mutableData.ChildrenCount >= MaxScores) {
+            } else if (mutableData.ChildrenCount >= MaxScores) {
             // If the current list of scores is greater or equal to our maximum allowed number,
             // we see if the new score should be added and remove the lowest existing score.
             long minScore = long.MaxValue;
@@ -152,23 +154,38 @@ namespace Firebase.Sample.Database {
             }
             // Otherwise, we remove the current lowest to be replaced with the new score.
             leaders.Remove(minVal);
-            }*/
-            if (string.IsNullOrEmpty(settingplayer.Instances.Color))
-            {
-                Debug.Log("No se ha elegido color");
-                return TransactionResult.Abort();
             }
+
             // Now we add the new score as a new entry that contains the email address and score.
             Dictionary<string, object> newScoreMap = new Dictionary<string, object>();
-            newScoreMap["color"] = settingplayer.Instances.Color;
-            newScoreMap["NombreTablero"] = "prueba";
+            newScoreMap["score"] = score;
+            newScoreMap["email"] = email;
             leaders.Add(newScoreMap);
-            //leaders = newScoreMap;
 
             // You must set the Value to indicate data at that location has changed.
             mutableData.Value = leaders;
             return TransactionResult.Success(mutableData);
         }
+        TransactionResult AddPlayerTransaction(MutableData mutableData)
+        {
+            Dictionary<string, object> leaders = mutableData.Value as Dictionary<string, object>;
+
+            if (leaders == null)
+            {
+                leaders = new Dictionary<string, object>(); ;
+            }
+            // Now we add the new score as a new entry that contains the email address and score.
+            Dictionary<string, object> newScoreMap = new Dictionary<string, object>();
+            newScoreMap["color"] = color;
+            newScoreMap["NombreTablero"] = tableroNAme;
+            leaders = newScoreMap;
+
+            // You must set the Value to indicate data at that location has changed.
+            mutableData.Value = leaders;
+            return TransactionResult.Success(mutableData);
+        }
+
+        
 
         public void AddScore() {
             score = 20;//.Parse(negro.text);
@@ -185,7 +202,7 @@ namespace Firebase.Sample.Database {
             DebugLog("Running Transaction...");
             // Use a transaction to ensure that we do not encounter issues with
             // simultaneous updates that otherwise might create more than MaxScores top scores.
-            reference.RunTransaction(AddScoreTransaction)
+            reference.RunTransaction(AddPlayerTransaction)
             .ContinueWith(task => {
                 if (task.Exception != null) {
                 DebugLog(task.Exception.ToString());
@@ -196,23 +213,33 @@ namespace Firebase.Sample.Database {
         }
         public void AddPlayer()
         {
-            score = 20;//.Parse(negro.text);
-            email = "bartolo";//blanco.text;
-            playerNAme = "bartolo@gmaill.com"; //UIHandler.instance.usuario.CurrentUser.Email;
-            if (score == 0 || string.IsNullOrEmpty(email))
+            playerNAme = "bartolo";//UIHandler.instance.usuario.CurrentUser.Email;
+            color = settingplayer.Instances.Color;
+            tableroNAme = settingplayer.Instances.TableroName;
+            if (string.IsNullOrEmpty(playerNAme))
             {
-                DebugLog("invalid score or email.");
+                DebugLog("nombre de jugador invalido");
                 return;
             }
-            DebugLog(String.Format("Attempting to add score {0} {1}",
-            email, score.ToString()));
+            else if (string.IsNullOrEmpty(color))
+            {
+                DebugLog("no ha elejido un color");
+                return;
+            }
+            else if (string.IsNullOrEmpty(tableroNAme))
+            {
+                DebugLog("nombre de tablero invalido");
+                return;
+            }
+            DebugLog(String.Format("Attempting to add a el jugador {0} que ha elegido las fichas {1} a el tablero de juego: {2}",
+            playerNAme, color, tableroNAme));
 
             DatabaseReference reference = FirebaseDatabase.DefaultInstance.GetReference(playerNAme);
 
             DebugLog("Running Transaction...");
             // Use a transaction to ensure that we do not encounter issues with
             // simultaneous updates that otherwise might create more than MaxScores top scores.
-            reference.RunTransaction(AddScoreTransaction)
+            reference.RunTransaction(AddPlayerTransaction)
             .ContinueWith(task => {
                 if (task.Exception != null)
                 {

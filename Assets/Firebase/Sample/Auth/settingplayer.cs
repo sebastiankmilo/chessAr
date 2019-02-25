@@ -10,6 +10,7 @@ public class settingplayer : MonoBehaviour
     [SerializeField] Toggle negro;
     public static settingplayer Instances { get; set; }
     public string Color { get; private set; }
+    public string TableroName { get { return tablero.text; }  }
     // Start is called before the first frame update
     void Start()
     {
