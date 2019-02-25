@@ -21,11 +21,12 @@ namespace Firebase.Sample.Database {
     using System.Collections.Generic;
     using UnityEngine;
     using UnityEngine.UI;
+    using Firebase.Sample.Auth;
 
     // Handler for UI buttons on the scene.  Also performs some
     // necessary setup (initializing the firebase app, etc) on
     // startup.
-public class DatabaseHandler : MonoBehaviour {
+    public class DatabaseHandler : MonoBehaviour {
 
         [SerializeField] Text blanco;
         [SerializeField] Text negro;
@@ -39,6 +40,7 @@ public class DatabaseHandler : MonoBehaviour {
         private string logText = "";
         private string email = "";
         private int score = 100;
+        private string playerNAme = "";
         protected bool UIEnabled = true;
 
         const int kMaxLogSize = 16382;
@@ -130,7 +132,7 @@ public class DatabaseHandler : MonoBehaviour {
 
             if (leaders == null) {
             leaders = new List<object>();
-            } else if (mutableData.ChildrenCount >= MaxScores) {
+            }/* else if (mutableData.ChildrenCount >= MaxScores) {
             // If the current list of scores is greater or equal to our maximum allowed number,
             // we see if the new score should be added and remove the lowest existing score.
             long minScore = long.MaxValue;
@@ -150,13 +152,18 @@ public class DatabaseHandler : MonoBehaviour {
             }
             // Otherwise, we remove the current lowest to be replaced with the new score.
             leaders.Remove(minVal);
+            }*/
+            if (string.IsNullOrEmpty(settingplayer.Instances.Color))
+            {
+                Debug.Log("No se ha elegido color");
+                return TransactionResult.Abort();
             }
-
             // Now we add the new score as a new entry that contains the email address and score.
             Dictionary<string, object> newScoreMap = new Dictionary<string, object>();
-            newScoreMap["score"] = score;
-            newScoreMap["email"] = email;
+            newScoreMap["color"] = settingplayer.Instances.Color;
+            newScoreMap["NombreTablero"] = "prueba";
             leaders.Add(newScoreMap);
+            //leaders = newScoreMap;
 
             // You must set the Value to indicate data at that location has changed.
             mutableData.Value = leaders;
@@ -164,8 +171,8 @@ public class DatabaseHandler : MonoBehaviour {
         }
 
         public void AddScore() {
-            score = Int32.Parse(negro.text);
-            email = blanco.text;
+            score = 20;//.Parse(negro.text);
+            email = "bartolo";//blanco.text;
             if (score == 0 || string.IsNullOrEmpty(email)) {
             DebugLog("invalid score or email.");
             return;
@@ -173,7 +180,7 @@ public class DatabaseHandler : MonoBehaviour {
             DebugLog(String.Format("Attempting to add score {0} {1}",
             email, score.ToString()));
 
-            DatabaseReference reference = FirebaseDatabase.DefaultInstance.GetReference("Leaders");
+            DatabaseReference reference = FirebaseDatabase.DefaultInstance.GetReference("sebastian");
 
             DebugLog("Running Transaction...");
             // Use a transaction to ensure that we do not encounter issues with
@@ -184,6 +191,36 @@ public class DatabaseHandler : MonoBehaviour {
                 DebugLog(task.Exception.ToString());
                 } else if (task.IsCompleted) {
                 DebugLog("Transaction complete.");
+                }
+            });
+        }
+        public void AddPlayer()
+        {
+            score = 20;//.Parse(negro.text);
+            email = "bartolo";//blanco.text;
+            playerNAme = "bartolo@gmaill.com"; //UIHandler.instance.usuario.CurrentUser.Email;
+            if (score == 0 || string.IsNullOrEmpty(email))
+            {
+                DebugLog("invalid score or email.");
+                return;
+            }
+            DebugLog(String.Format("Attempting to add score {0} {1}",
+            email, score.ToString()));
+
+            DatabaseReference reference = FirebaseDatabase.DefaultInstance.GetReference(playerNAme);
+
+            DebugLog("Running Transaction...");
+            // Use a transaction to ensure that we do not encounter issues with
+            // simultaneous updates that otherwise might create more than MaxScores top scores.
+            reference.RunTransaction(AddScoreTransaction)
+            .ContinueWith(task => {
+                if (task.Exception != null)
+                {
+                    DebugLog(task.Exception.ToString());
+                }
+                else if (task.IsCompleted)
+                {
+                    DebugLog("Transaction complete.");
                 }
             });
         }
