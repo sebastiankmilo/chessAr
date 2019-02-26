@@ -31,6 +31,7 @@ namespace Firebase.Sample.Database {
         [SerializeField] Text blanco;
         [SerializeField] Text negro;
         [SerializeField] Text Tablero;
+        [SerializeField] Text debuglog;
         ArrayList leaderBoard = new ArrayList();
      
 
@@ -40,7 +41,7 @@ namespace Firebase.Sample.Database {
         private string logText = "";
         private string email = "";
         private int score = 100;
-        private string playerNAme = "";
+        [SerializeField] private string playerName = "";
         private string color = "";
         private string tableroNAme = "";
         protected bool UIEnabled = true;
@@ -118,13 +119,28 @@ namespace Firebase.Sample.Database {
         // Output text to the debug log text field, as well as the console.
         public void DebugLog(string s) {
             Debug.Log(s);
-            logText += s + "\n";
+            debuglog.text = s;
+            logText = s;// + "\n";
 
-            while (logText.Length > kMaxLogSize) {
+            /*while (logText.Length > kMaxLogSize) {
             int index = logText.IndexOf("\n");
             logText = logText.Substring(index + 1);
-            }
+                
+            }*/
         }
+        public void DebugLog(string s,bool mensaje)
+        {
+            Debug.Log(s);
+            if (mensaje) { debuglog.text = s; }
+            logText = s;// + "\n";
+
+            /*while (logText.Length > kMaxLogSize) {
+            int index = logText.IndexOf("\n");
+            logText = logText.Substring(index + 1);
+                
+            }*/
+        }
+
 
         // A realtime database transaction receives MutableData which can be modified
         // and returns a TransactionResult which is either TransactionResult.Success(data) with
@@ -166,26 +182,16 @@ namespace Firebase.Sample.Database {
             mutableData.Value = leaders;
             return TransactionResult.Success(mutableData);
         }
-        TransactionResult AddPlayerTransaction(MutableData mutableData)
+        TransactionResult ReadPlayerNameTransaction(MutableData mutableData)
         {
-            Dictionary<string, object> leaders = mutableData.Value as Dictionary<string, object>;
-
-            if (leaders == null)
-            {
-                leaders = new Dictionary<string, object>(); ;
-            }
-            // Now we add the new score as a new entry that contains the email address and score.
-            Dictionary<string, object> newScoreMap = new Dictionary<string, object>();
-            newScoreMap["color"] = color;
-            newScoreMap["NombreTablero"] = tableroNAme;
-            leaders = newScoreMap;
-
-            // You must set the Value to indicate data at that location has changed.
-            mutableData.Value = leaders;
+           
             return TransactionResult.Success(mutableData);
         }
 
         
+        
+
+
 
         public void AddScore() {
             score = 20;//.Parse(negro.text);
@@ -213,10 +219,10 @@ namespace Firebase.Sample.Database {
         }
         public void AddPlayer()
         {
-            playerNAme = "bartolo";//UIHandler.instance.usuario.CurrentUser.Email;
+            playerName = UIHandler.instance.usuario.CurrentUser.UserId;
             color = settingplayer.Instances.Color;
             tableroNAme = settingplayer.Instances.TableroName;
-            if (string.IsNullOrEmpty(playerNAme))
+            if (string.IsNullOrEmpty(playerName))
             {
                 DebugLog("nombre de jugador invalido");
                 return;
@@ -232,24 +238,278 @@ namespace Firebase.Sample.Database {
                 return;
             }
             DebugLog(String.Format("Attempting to add a el jugador {0} que ha elegido las fichas {1} a el tablero de juego: {2}",
-            playerNAme, color, tableroNAme));
+            playerName, color, tableroNAme),false);
 
-            DatabaseReference reference = FirebaseDatabase.DefaultInstance.GetReference(playerNAme);
+            DatabaseReference reference = FirebaseDatabase.DefaultInstance.GetReference(playerName);
 
-            DebugLog("Running Transaction...");
+            DebugLog("Running Transaction...",false);
             // Use a transaction to ensure that we do not encounter issues with
             // simultaneous updates that otherwise might create more than MaxScores top scores.
             reference.RunTransaction(AddPlayerTransaction)
             .ContinueWith(task => {
                 if (task.Exception != null)
                 {
-                    DebugLog(task.Exception.ToString());
+                    DebugLog(task.Exception.ToString()+" el error se presento en Addplayer");
                 }
                 else if (task.IsCompleted)
                 {
-                    DebugLog("Transaction complete.");
+                    //settingplayer.Instances.Listo = true;
+                    //DebugLog("Transaction complete. ",true);
+                    AddTableroDeJuego();
+                    
+                    
                 }
             });
+        }
+        TransactionResult AddPlayerTransaction(MutableData mutableData)
+        {
+            Dictionary<string, object> leaders = mutableData.Value as Dictionary<string, object>;
+
+            if (leaders == null)
+            {
+                leaders = new Dictionary<string, object>(); ;
+            }
+            // Now we add the new score as a new entry that contains the email address and score.
+            Dictionary<string, object> newScoreMap = new Dictionary<string, object>();
+            newScoreMap["color"] = color;
+            newScoreMap["NombreTablero"] = tableroNAme;
+            leaders = newScoreMap;
+
+            // You must set the Value to indicate data at that location has changed.
+            mutableData.Value = leaders;
+            return TransactionResult.Success(mutableData);
+        }
+        public void AddTableroDeJuego()
+        {
+            tableroNAme = settingplayer.Instances.TableroName;
+            if (string.IsNullOrEmpty(tableroNAme))
+            {
+                DebugLog("nombre de tablero invalido");
+                return;
+            }
+            DebugLog(String.Format("Creando el tablero de juego: {0}", tableroNAme), false);
+
+            DatabaseReference reference = FirebaseDatabase.DefaultInstance.GetReference(tableroNAme);
+
+            DebugLog("Running Transaction...", false);
+            // Use a transaction to ensure that we do not encounter issues with
+            // simultaneous updates that otherwise might create more than MaxScores top scores.
+            reference.RunTransaction(AddTableroTransaction)
+            .ContinueWith(task => {
+                if (task.Exception != null)
+                {
+                    Debug.Log(task.Exception.ToString());
+                }
+                else if (task.IsCompleted)
+                {
+                    settingplayer.Instances.Listo = true;
+                    Debug.Log("el jugador blanco es: "+task.Result.Child("blanco").Value.ToString());
+
+                }
+            });
+        }
+        TransactionResult AddTableroTransaction(MutableData mutableData)
+        {
+            Dictionary<string, object> leaders = mutableData.Value as Dictionary<string, object>;
+            string _color = color;
+            string _playerName;
+            //inicializo un tablero de juegos, si no existe;
+            if (leaders == null)
+            {
+                leaders = new Dictionary<string, object>();
+                leaders["blanco"] = "";
+                leaders["negro"] = "";
+                leaders["posxOld"] = 0;
+                leaders["posyOld"] = 0;
+                leaders["posxNew"] = 0;
+                leaders["posyNew"] = 0;
+
+            }
+
+            /*DatabaseReference reference = FirebaseDatabase.DefaultInstance.GetReference("bartolo");
+            IDebugLog("Running Transaction...");
+            // Use a transaction to ensure that we do not encounter issues with
+            // simultaneous updates that otherwise might create more than MaxScores top scores.
+            reference.RunTransaction(ReadPlayerNameTransaction)
+            .ContinueWith(task =>
+            {
+                if (task.Exception != null)
+                {
+                    Debug.Log(/*task.Exception.ToString()+///"El error se presento cuando voy a leer los datos del jugador");
+                    _color = "";
+                }
+                else if (task.IsCompleted) //accedo a leer los datos del jugador en la nube
+                {
+                    Debug.Log("Transaction complete. " + "leer datos del jugador");
+                    _color = task.Result.Child("color").Value.ToString();//leo el color que tiene asignado este usuario en la nube
+                    Debug.Log("color: " + _color + " " + string.IsNullOrEmpty(_color).ToString());
+                }
+            });
+            reference.GetValueAsync().ContinueWith(task => {
+                if (task.IsFaulted)
+                {
+                    // Handle the error...
+                }
+                else if (task.IsCompleted)
+                {
+                    _color = task.Result.Child("color").Value.ToString();
+                    // Do something with snapshot...
+                }
+            });*/
+            Debug.Log("busqueda: " +leaders[color]+ "blanco" + _color);
+           if (string.IsNullOrEmpty(leaders[_color].ToString()))//accedo a el valor de color de este usuario y verifico si este color no esta ocupado en el tablero de juego
+            {
+                if ((string)leaders[Otrocolor(_color)] != playerName) //rectifico que la sala, el otro color no esta ocupado por este jugador
+                {
+                    leaders[_color] = UIHandler.instance.usuario.CurrentUser.UserId;
+                    UnityMainThreadDispatcher.Instance().Enqueue(IDebugLog("Configurado Sala de Juego"));
+                    Debug.Log(_color + " : " + leaders[_color]);
+
+
+
+                }
+                else
+                {
+                    UnityMainThreadDispatcher.Instance().Enqueue(IDebugLog("El usuario ya tiene asignado el color " + Otrocolor(_color)+" en la sala de juego "+tableroNAme+" así que se procede a cambiar de color"));
+                    leaders[Otrocolor(_color)] = "";
+                    leaders[_color] = playerName;
+                    //return TransactionResult.Abort();
+                }
+            }
+            else
+            {
+                if (leaders[_color].ToString()==playerName)
+                {
+                    UnityMainThreadDispatcher.Instance().Enqueue(IDebugLog("Ud ya eligio el color: "+_color+" en esta sala de juego"));
+                }
+                else if ((string)leaders[Otrocolor(_color)] == playerName)
+                {
+                    UnityMainThreadDispatcher.Instance().Enqueue(IDebugLog("Ud ya eligio el color: " + Otrocolor(_color)));
+                }
+                else if (string.IsNullOrEmpty((string)leaders[Otrocolor(_color)]))
+                {
+                    UnityMainThreadDispatcher.Instance().Enqueue(IDebugLog("Esta sala solo tiene libre el color " + Otrocolor(_color)));
+                }
+                else
+                {
+                    UnityMainThreadDispatcher.Instance().Enqueue(IDebugLog("no hay espacio para más jugadores"+" En la sala "+tableroNAme));
+                    return TransactionResult.Abort();
+                }
+                
+
+            }
+            // You must set the Value to indicate data at that location has changed.
+            mutableData.Value = leaders;
+            return TransactionResult.Success(mutableData);
+        }
+
+        public void playGame()
+        {
+            tableroNAme = settingplayer.Instances.TableroName;
+            if (string.IsNullOrEmpty(tableroNAme))
+            {
+                DebugLog("nombre de tablero invalido");
+                return;
+            }
+            DebugLog(String.Format("Creando el tablero de juego: {0}", tableroNAme), false);
+
+            DatabaseReference reference = FirebaseDatabase.DefaultInstance.GetReference(tableroNAme);
+
+            DebugLog("Running Transaction...", false);
+            // Use a transaction to ensure that we do not encounter issues with
+            // simultaneous updates that otherwise might create more than MaxScores top scores.
+            reference.RunTransaction(playGameTransaction)
+            .ContinueWith(task => {
+                if (task.Exception != null)
+                {
+                    Debug.Log(task.Exception.ToString());
+                }
+                else if (task.IsCompleted)
+                {
+                    settingplayer.Instances.Listo = true;
+                    Debug.Log("el jugador blanco es: " + task.Result.Child("blanco").Value.ToString());
+
+                }
+            });
+        }
+        TransactionResult playGameTransaction(MutableData mutableData)
+        {
+            Dictionary<string, object> leaders = mutableData.Value as Dictionary<string, object>;
+            string _color = color;
+            string _playerName;
+            //inicializo un tablero de juegos, si no existe;
+            if (leaders == null)
+            {
+                UnityMainThreadDispatcher.Instance().Enqueue(IDebugLog("no se ha creado la sala de juego " + tableroNAme));
+                return TransactionResult.Abort();
+
+            }
+
+            
+            Debug.Log("busqueda: " + leaders[color] + "blanco" + _color);
+            if (string.IsNullOrEmpty(leaders[_color].ToString()))//accedo a el valor de color de este usuario y verifico si este color no esta ocupado en el tablero de juego
+            {
+                if ((string)leaders[Otrocolor(_color)] != playerName) //rectifico que la sala, el otro color no esta ocupado por este jugador
+                {
+                    leaders[_color] = UIHandler.instance.usuario.CurrentUser.UserId;
+                    UnityMainThreadDispatcher.Instance().Enqueue(IDebugLog("Configurado Sala de Juego"));
+                    Debug.Log(_color + " : " + leaders[_color]);
+
+
+
+                }
+                else
+                {
+                    UnityMainThreadDispatcher.Instance().Enqueue(IDebugLog("El usuario ya tiene asignado el color " + Otrocolor(_color) + " en la sala de juego " + tableroNAme + " así que se procede a cambiar de color"));
+                    leaders[Otrocolor(_color)] = "";
+                    leaders[_color] = playerName;
+                    //return TransactionResult.Abort();
+                }
+            }
+            else
+            {
+                if (leaders[_color].ToString() == playerName)
+                {
+                    UnityMainThreadDispatcher.Instance().Enqueue(IDebugLog("Ud ya eligio el color: " + _color + " en esta sala de juego"));
+                }
+                else if ((string)leaders[Otrocolor(_color)] == playerName)
+                {
+                    UnityMainThreadDispatcher.Instance().Enqueue(IDebugLog("Ud ya eligio el color: " + Otrocolor(_color)));
+                }
+                else if (string.IsNullOrEmpty((string)leaders[Otrocolor(_color)]))
+                {
+                    UnityMainThreadDispatcher.Instance().Enqueue(IDebugLog("Esta sala solo tiene libre el color " + Otrocolor(_color)));
+                }
+                else
+                {
+                    UnityMainThreadDispatcher.Instance().Enqueue(IDebugLog("no hay espacio para más jugadores" + " En la sala " + tableroNAme));
+                    return TransactionResult.Abort();
+                }
+
+
+            }
+            // You must set the Value to indicate data at that location has changed.
+            mutableData.Value = leaders;
+            return TransactionResult.Success(mutableData);
+        }
+
+
+        public IEnumerator IDebugLog(string s)
+        {
+           debuglog.text=s;
+            yield return null;
+        }
+        public string Otrocolor (string color)
+        {
+            if (color=="blanco")
+            {
+                return "negro";
+            }
+            else if (color=="negro")
+            {
+                return "blanco";
+            }
+            return "color erroneo";
         }
 
     }

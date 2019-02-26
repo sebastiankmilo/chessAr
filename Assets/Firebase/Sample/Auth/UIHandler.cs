@@ -86,6 +86,7 @@ namespace Firebase.Sample.Auth {
     // the required dependencies to use Firebase, and if not,
     // add them if possible.
     public virtual void Start() {
+            Screen.orientation = ScreenOrientation.Portrait;
             Firebase.FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task => {
             dependencyStatus = task.Result;
             if (dependencyStatus == Firebase.DependencyStatus.Available) {
@@ -552,9 +553,10 @@ namespace Firebase.Sample.Auth {
     }
 
     // Sign out the current user.
-    protected void SignOut() {
+    public void SignOut() {
       DebugLog("Signing out.");
       auth.SignOut();
+            SceneManager.LoadScene(0,LoadSceneMode.Single);
     }
 
     // Delete the currently logged in user.
