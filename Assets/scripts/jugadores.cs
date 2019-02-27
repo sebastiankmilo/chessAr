@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
 using System.Text;
+using Firebase.Sample.Database;
 
 public class jugadores : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class jugadores : MonoBehaviour
     [SerializeField] InputField jugador;
     [SerializeField] GameObject botonNegro;
     [SerializeField] GameObject botonBlanco;
+    [SerializeField] DatabaseHandler datos;
     bool movimiento=false;
     int turno = 0;
     public bool remoto { get; set; }
@@ -76,9 +78,13 @@ public class jugadores : MonoBehaviour
     {
         player = this;
     }
+    private void Start()
+    {
+        datos.StartListener2(settingplayer.Instances.TableroName);
+    }
     void Update()
     {
-        if (jugador.text == "negro")
+        if (settingplayer.Instances.Color == "negro")
         {
             remoto = true;
             Remoto = remoto;
@@ -86,7 +92,7 @@ public class jugadores : MonoBehaviour
             botonBlanco.SetActive(false);
 
         }
-        else if(jugador.text == "blanco")
+        else if(settingplayer.Instances.Color == "blanco")
         {
             remoto = false;
             Remoto = remoto;

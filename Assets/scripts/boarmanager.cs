@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Firebase.Sample.Database;
 
 public class boarmanager : MonoBehaviour
 {
@@ -12,6 +13,7 @@ public class boarmanager : MonoBehaviour
 
     [SerializeField] private const float TILE_SIZE = 1.25f; // tamaño de la valdosa
     [SerializeField] private const float TITLE_OFFSET = 0.625f; // la mitad de la valdosa
+    [SerializeField] DatabaseHandler datos;
     public  float Tile_Size() { return TILE_SIZE; }
     public float Tile_Offset() { return TITLE_OFFSET; }
     // que se mestre la valdosa seleccionada
@@ -31,6 +33,7 @@ public class boarmanager : MonoBehaviour
     {
         Instance = this;
         SpawnAllChessman();
+        Screen.orientation = ScreenOrientation.LandscapeLeft;
 
     }
     private void Update()
@@ -100,7 +103,7 @@ public class boarmanager : MonoBehaviour
 
     #endregion
     #region PRIVATE_METHODS
-    private void selectchessman(int x,int y)
+    public void selectchessman(int x,int y)
     {
         if (chessmans[x, y] == null)
         {
@@ -130,7 +133,7 @@ public class boarmanager : MonoBehaviour
 
     }
     
-    private void movechessman(int x, int y)
+    public void movechessman(int x, int y)
     {
         if (allowedmoves[x, y])
         {
@@ -148,6 +151,7 @@ public class boarmanager : MonoBehaviour
                 activeChessman.Remove(c.gameObject);
                 Destroy(c.gameObject);
             }
+            datos.move(selectedchessman.Currentx, selectedchessman.Currenty,x,y);
             chessmans[selectedchessman.Currentx, selectedchessman.Currenty] = null;
             selectedchessman.transform.localPosition = GetTileCenter(x, y);
             selectedchessman.setposition(x, y);

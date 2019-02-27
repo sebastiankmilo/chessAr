@@ -22,6 +22,7 @@ namespace Firebase.Sample.Database {
     using UnityEngine;
     using UnityEngine.UI;
     using Firebase.Sample.Auth;
+    using UnityEngine.SceneManagement;
 
     // Handler for UI buttons on the scene.  Also performs some
     // necessary setup (initializing the firebase app, etc) on
@@ -45,6 +46,10 @@ namespace Firebase.Sample.Database {
         private string color = "";
         private string tableroNAme = "";
         protected bool UIEnabled = true;
+        int posxOld;
+        int posyOld;
+        int posxNew;
+        int posyNew;
 
         const int kMaxLogSize = 16382;
         DependencyStatus dependencyStatus = DependencyStatus.UnavailableOther;
@@ -105,6 +110,41 @@ namespace Firebase.Sample.Database {
 
                     }
                 }
+                }
+            };
+        }
+        public void StartListener2(string TableroName)
+        {
+            FirebaseDatabase.DefaultInstance
+            .GetReference(TableroName)
+            .ValueChanged += (object sender2, ValueChangedEventArgs e2) => {
+                if (e2.DatabaseError != null)
+                {
+                    Debug.LogError(e2.DatabaseError.Message);
+                    return;
+                }
+                Debug.Log("Received values for "+ TableroName);
+                string title = leaderBoard[0].ToString();
+                leaderBoard.Clear();
+                leaderBoard.Add(title);
+                if (e2.Snapshot != null && e2.Snapshot.ChildrenCount > 0)
+                {
+                    
+                        if (e2.Snapshot.Child("posxOld") == null
+                        || e2.Snapshot.Child("posxNew").Value == null)
+                        {
+                            Debug.LogError("Bad data in sample.  Did you forget to call SetEditorDatabaseUrl with your project id?");
+                            
+                        }
+                        else
+                        {
+                            
+                            boarmanager.Instance.selectchessman(Int32.Parse(e2.Snapshot.Child("posxOld").Value.ToString()), Int32.Parse(e2.Snapshot.Child("posyOld").Value.ToString()));
+                            boarmanager.Instance.movechessman(Int32.Parse(e2.Snapshot.Child("posxNew").Value.ToString()), Int32.Parse(e2.Snapshot.Child("posyNew").Value.ToString()));
+                            Debug.Log("moviendo fichas");
+
+                        }
+                    
                 }
             };
         }
@@ -411,11 +451,11 @@ namespace Firebase.Sample.Database {
                 DebugLog("nombre de tablero invalido");
                 return;
             }
-            DebugLog(String.Format("Creando el tablero de juego: {0}", tableroNAme), false);
+            DebugLog(String.Format("accediendo el tablero de juego: {0}", tableroNAme), false);
 
             DatabaseReference reference = FirebaseDatabase.DefaultInstance.GetReference(tableroNAme);
 
-            DebugLog("Running Transaction...", false);
+            DebugLog("Running Transaction playgame...", false);
             // Use a transaction to ensure that we do not encounter issues with
             // simultaneous updates that otherwise might create more than MaxScores top scores.
             reference.RunTransaction(playGameTransaction)
@@ -426,8 +466,8 @@ namespace Firebase.Sample.Database {
                 }
                 else if (task.IsCompleted)
                 {
-                    settingplayer.Instances.Listo = true;
-                    Debug.Log("el jugador blanco es: " + task.Result.Child("blanco").Value.ToString());
+                    UnityMainThreadDispatcher.Instance().Enqueue(IDebugLog("LISTO PARA JUGAR"));
+                    UnityMainThreadDispatcher.Instance().Enqueue(changeScne(2));
 
                 }
             });
@@ -435,8 +475,7 @@ namespace Firebase.Sample.Database {
         TransactionResult playGameTransaction(MutableData mutableData)
         {
             Dictionary<string, object> leaders = mutableData.Value as Dictionary<string, object>;
-            string _color = color;
-            string _playerName;
+            string _color = settingplayer.Instances.Color;
             //inicializo un tablero de juegos, si no existe;
             if (leaders == null)
             {
@@ -444,54 +483,84 @@ namespace Firebase.Sample.Database {
                 return TransactionResult.Abort();
 
             }
-
-            
-            Debug.Log("busqueda: " + leaders[color] + "blanco" + _color);
-            if (string.IsNullOrEmpty(leaders[_color].ToString()))//accedo a el valor de color de este usuario y verifico si este color no esta ocupado en el tablero de juego
+            Debug.Log(leaders[_color].ToString());
+            if (leaders[_color].ToString() == UIHandler.instance.usuario.CurrentUser.UserId)//accedo a el valor de color de este usuario y verifico si este color no esta ocupado en el tablero de juego
             {
-                if ((string)leaders[Otrocolor(_color)] != playerName) //rectifico que la sala, el otro color no esta ocupado por este jugador
-                {
-                    leaders[_color] = UIHandler.instance.usuario.CurrentUser.UserId;
-                    UnityMainThreadDispatcher.Instance().Enqueue(IDebugLog("Configurado Sala de Juego"));
-                    Debug.Log(_color + " : " + leaders[_color]);
-
-
-
-                }
-                else
-                {
-                    UnityMainThreadDispatcher.Instance().Enqueue(IDebugLog("El usuario ya tiene asignado el color " + Otrocolor(_color) + " en la sala de juego " + tableroNAme + " así que se procede a cambiar de color"));
-                    leaders[Otrocolor(_color)] = "";
-                    leaders[_color] = playerName;
-                    //return TransactionResult.Abort();
-                }
+                mutableData.Value = leaders;
+                return TransactionResult.Success(mutableData);
+            }
+            else if (leaders[Otrocolor(_color)].ToString() == UIHandler.instance.usuario.CurrentUser.UserId)
+            {
+                UnityMainThreadDispatcher.Instance().Enqueue(IDebugLog("no ha actualizado el color de jugador a "+_color));
+                return TransactionResult.Abort();
             }
             else
             {
-                if (leaders[_color].ToString() == playerName)
-                {
-                    UnityMainThreadDispatcher.Instance().Enqueue(IDebugLog("Ud ya eligio el color: " + _color + " en esta sala de juego"));
-                }
-                else if ((string)leaders[Otrocolor(_color)] == playerName)
-                {
-                    UnityMainThreadDispatcher.Instance().Enqueue(IDebugLog("Ud ya eligio el color: " + Otrocolor(_color)));
-                }
-                else if (string.IsNullOrEmpty((string)leaders[Otrocolor(_color)]))
-                {
-                    UnityMainThreadDispatcher.Instance().Enqueue(IDebugLog("Esta sala solo tiene libre el color " + Otrocolor(_color)));
-                }
-                else
-                {
-                    UnityMainThreadDispatcher.Instance().Enqueue(IDebugLog("no hay espacio para más jugadores" + " En la sala " + tableroNAme));
-                    return TransactionResult.Abort();
-                }
 
+                UnityMainThreadDispatcher.Instance().Enqueue(IDebugLog("sala de juego: " + tableroNAme+" llena"));
+                return TransactionResult.Abort();
 
             }
             // You must set the Value to indicate data at that location has changed.
+           
+        }
+
+        public void move(int x,int y, int X, int Y)
+        {
+            posxOld = x;
+            posyOld = y;
+            posxNew = X;
+            posyNew = Y;
+            if (string.IsNullOrEmpty(settingplayer.Instances.TableroName))
+            {
+                DebugLog("nombre de tablero invalido");
+                return;
+            }
+            Debug.Log(String.Format("accediendo el tablero de juego: {0}", settingplayer.Instances.TableroName));
+
+            DatabaseReference reference = FirebaseDatabase.DefaultInstance.GetReference(settingplayer.Instances.TableroName);
+
+            Debug.Log("Running Transaction move chess...");
+            // Use a transaction to ensure that we do not encounter issues with
+            // simultaneous updates that otherwise might create more than MaxScores top scores.
+            reference.RunTransaction(moveTransaction)
+            .ContinueWith(task => {
+                if (task.Exception != null)
+                {
+                    Debug.Log(task.Exception.ToString());
+                }
+                else if (task.IsCompleted)
+                {
+
+                    Debug.Log("SE ha movido");                
+
+                }
+            });
+        }
+        TransactionResult moveTransaction(MutableData mutableData)
+        {
+            Dictionary<string, object> leaders = mutableData.Value as Dictionary<string, object>;
+            //inicializo un tablero de juegos, si no existe;
+            if (leaders == null)
+            {
+                Debug.Log("no existe " + settingplayer.Instances.TableroName);
+                return TransactionResult.Abort();
+            }
+            if (leaders[settingplayer.Instances.Color].ToString()== UIHandler.instance.usuario.CurrentUser.UserId)
+            {
+                leaders["posxOld"] = posxOld;
+                leaders["posyOld"] = posyOld;
+                leaders["posxNew"] = posxNew;
+                leaders["posyNew"] = posyNew;
+            }
+            
+
             mutableData.Value = leaders;
             return TransactionResult.Success(mutableData);
+            // You must set the Value to indicate data at that location has changed.
+
         }
+
 
 
         public IEnumerator IDebugLog(string s)
@@ -510,6 +579,11 @@ namespace Firebase.Sample.Database {
                 return "blanco";
             }
             return "color erroneo";
+        }
+        public IEnumerator changeScne(int x )
+        {
+            SceneManager.LoadScene(x,LoadSceneMode.Single);
+            yield return null;
         }
 
     }
