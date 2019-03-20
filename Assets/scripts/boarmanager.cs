@@ -29,9 +29,13 @@ public class boarmanager : MonoBehaviour
     public bool iswhiteturn = true;
 
     #region MONOBEHAVIOUR_METHODS
-    private void Start()
+    private void Awake()
     {
         Instance = this;
+    }
+    private void Start()
+    {
+        
         SpawnAllChessman();
         Screen.orientation = ScreenOrientation.LandscapeLeft;
 
@@ -64,7 +68,7 @@ public class boarmanager : MonoBehaviour
             {
                 //move chessman
                 movechessman(selectionx, selectiony);
-                Debug.Log("Se Movio la ficha");
+                
             }
         }
     }
@@ -101,6 +105,14 @@ public class boarmanager : MonoBehaviour
         }
     }
 
+    public void remoteok(int oldx, int oldy, int newx, int newy)
+    {
+        selectchessman(oldx, oldy);
+        if (selectedchessman != null)
+        {
+            movechessman(newx, newy);
+        }
+    }
     #endregion
     #region PRIVATE_METHODS
     public void selectchessman(int x,int y)
@@ -135,34 +147,55 @@ public class boarmanager : MonoBehaviour
     
     public void movechessman(int x, int y)
     {
-        if (allowedmoves[x, y])
+
+        Debug.Log("entro a el movimiento perrasss");
+        try
         {
-            chessman c = chessmans[x, y];
-
-            if (c != null && c.iswhite != iswhiteturn)
+            if (allowedmoves[x, y])
             {
-                // capture pieza
-                // si es el rey
-                if (c.GetType() == typeof(king))
-                {
-                    EndGame();
-                    return;
-                }
-                activeChessman.Remove(c.gameObject);
-                Destroy(c.gameObject);
-            }
-            datos.move(selectedchessman.Currentx, selectedchessman.Currenty,x,y);
-            chessmans[selectedchessman.Currentx, selectedchessman.Currenty] = null;
-            selectedchessman.transform.localPosition = GetTileCenter(x, y);
-            selectedchessman.setposition(x, y);
-            chessmans[x, y] = selectedchessman;
-            iswhiteturn = !iswhiteturn;
-        }
+                chessman c = chessmans[x, y];
 
+                if (c != null && c.iswhite != iswhiteturn)
+                {
+                    // capture pieza
+                    // si es el rey
+                    if (c.GetType() == typeof(king))
+                    {
+                        EndGame();
+                        return;
+                    }
+                    activeChessman.Remove(c.gameObject);
+                    Destroy(c.gameObject);
+                }
+                int oldx = selectedchessman.Currentx;
+                int oldy = selectedchessman.Currenty;
+                //
+                chessmans[selectedchessman.Currentx, selectedchessman.Currenty] = null;
+                selectedchessman.transform.localPosition = GetTileCenter(x, y);
+                selectedchessman.setposition(x, y);
+                chessmans[x, y] = selectedchessman;
+                iswhiteturn = !iswhiteturn;
+                Debug.Log("se movio la ficha");
+                UnityMainThreadDispatcher.Instance().Enqueue(movetoremote(oldx,oldy,x,y));
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.Log(e.Data);
+        }
+        
         boardhightlights.Instance.hidehighlights();
         selectedchessman = null;
     }
-    
+
+    public IEnumerator movetoremote(int oldx, int oldy, int newx, int newy)
+    {
+        
+        yield return new WaitForSeconds(0.1f);
+        datos.move(oldx, oldy, newx,newy);
+        yield return null;
+    }
+
     private void UpdateSelection()
     {
         //arriba

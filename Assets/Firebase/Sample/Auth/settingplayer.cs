@@ -12,7 +12,7 @@ public class settingplayer : MonoBehaviour
     [SerializeField] Button play;
     public static settingplayer Instances { get; set; }
     //[SerializeField] string color;
-    public string Color { get; private set; }
+    public string Color { get; set; }
     public string TableroName { get { return tablero.text; }  }
     [SerializeField] bool listo=false;
     public bool Listo { get { return listo; } set { listo = value; } }

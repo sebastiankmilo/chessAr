@@ -125,26 +125,30 @@ namespace Firebase.Sample.Database {
                 }
                 Debug.Log("Received values for "+ TableroName);
                 string title = leaderBoard[0].ToString();
-                leaderBoard.Clear();
-                leaderBoard.Add(title);
+                
                 if (e2.Snapshot != null && e2.Snapshot.ChildrenCount > 0)
                 {
                     
                         if (e2.Snapshot.Child("posxOld") == null
-                        || e2.Snapshot.Child("posxNew").Value == null)
+                        || e2.Snapshot.Child("posxOld").Value == null)
                         {
                             Debug.LogError("Bad data in sample.  Did you forget to call SetEditorDatabaseUrl with your project id?");
                             
                         }
-                        else
+                        else                                          
                         {
-                            
-                            boarmanager.Instance.selectchessman(Int32.Parse(e2.Snapshot.Child("posxOld").Value.ToString()), Int32.Parse(e2.Snapshot.Child("posyOld").Value.ToString()));
-                            boarmanager.Instance.movechessman(Int32.Parse(e2.Snapshot.Child("posxNew").Value.ToString()), Int32.Parse(e2.Snapshot.Child("posyNew").Value.ToString()));
-                            Debug.Log("moviendo fichas");
-
+                            Debug.Log("moviendo de la posicion " + e2.Snapshot.Child("posxOld").Value.ToString() + "," + e2.Snapshot.Child("posyOld").Value.ToString() + " a la poscición " +
+                            e2.Snapshot.Child("posxNew").Value.ToString() + "," + e2.Snapshot.Child("posyNew").Value.ToString());
+                            UnityMainThreadDispatcher.Instance().Enqueue(moveremote(Int32.Parse(e2.Snapshot.Child("posxOld").Value.ToString()), Int32.Parse(e2.Snapshot.Child("posyOld").Value.ToString()),
+                                                                                    Int32.Parse(e2.Snapshot.Child("posxNew").Value.ToString()), Int32.Parse(e2.Snapshot.Child("posyNew").Value.ToString())));
                         }
+
                     
+                    
+                }
+                else
+                {
+                    Debug.Log("No se accedio a la base de datos");
                 }
             };
         }
@@ -185,43 +189,6 @@ namespace Firebase.Sample.Database {
         // A realtime database transaction receives MutableData which can be modified
         // and returns a TransactionResult which is either TransactionResult.Success(data) with
         // modified data or TransactionResult.Abort() which stops the transaction with no changes.
-        TransactionResult AddScoreTransaction(MutableData mutableData) {
-            List<object> leaders = mutableData.Value as List<object>;
-
-            if (leaders == null) {
-            leaders = new List<object>();
-            } else if (mutableData.ChildrenCount >= MaxScores) {
-            // If the current list of scores is greater or equal to our maximum allowed number,
-            // we see if the new score should be added and remove the lowest existing score.
-            long minScore = long.MaxValue;
-            object minVal = null;
-            foreach (var child in leaders) {
-                if (!(child is Dictionary<string, object>))
-                continue;
-                long childScore = (long)((Dictionary<string, object>)child)["score"];
-                if (childScore < minScore) {
-                minScore = childScore;
-                minVal = child;
-                }
-            }
-            // If the new score is lower than the current minimum, we abort.
-            if (minScore > score) {
-                return TransactionResult.Abort();
-            }
-            // Otherwise, we remove the current lowest to be replaced with the new score.
-            leaders.Remove(minVal);
-            }
-
-            // Now we add the new score as a new entry that contains the email address and score.
-            Dictionary<string, object> newScoreMap = new Dictionary<string, object>();
-            newScoreMap["score"] = score;
-            newScoreMap["email"] = email;
-            leaders.Add(newScoreMap);
-
-            // You must set the Value to indicate data at that location has changed.
-            mutableData.Value = leaders;
-            return TransactionResult.Success(mutableData);
-        }
         TransactionResult ReadPlayerNameTransaction(MutableData mutableData)
         {
            
@@ -257,6 +224,55 @@ namespace Firebase.Sample.Database {
                 }
             });
         }
+        TransactionResult AddScoreTransaction(MutableData mutableData)
+        {
+            List<object> leaders = mutableData.Value as List<object>;
+
+            if (leaders == null)
+            {
+                leaders = new List<object>();
+            }
+            else if (mutableData.ChildrenCount >= MaxScores)
+            {
+                // If the current list of scores is greater or equal to our maximum allowed number,
+                // we see if the new score should be added and remove the lowest existing score.
+                long minScore = long.MaxValue;
+                object minVal = null;
+                foreach (var child in leaders)
+                {
+                    if (!(child is Dictionary<string, object>))
+                        continue;
+                    long childScore = (long)((Dictionary<string, object>)child)["score"];
+                    if (childScore < minScore)
+                    {
+                        minScore = childScore;
+                        minVal = child;
+                    }
+                }
+                // If the new score is lower than the current minimum, we abort.
+                if (minScore > score)
+                {
+                    return TransactionResult.Abort();
+                }
+                // Otherwise, we remove the current lowest to be replaced with the new score.
+                leaders.Remove(minVal);
+            }
+
+            // Now we add the new score as a new entry that contains the email address and score.
+            Dictionary<string, object> newScoreMap = new Dictionary<string, object>();
+            newScoreMap["score"] = score;
+            newScoreMap["email"] = email;
+            leaders.Add(newScoreMap);
+
+            // You must set the Value to indicate data at that location has changed.
+            mutableData.Value = leaders;
+            return TransactionResult.Success(mutableData);
+        }
+
+
+
+
+
         public void AddPlayer()
         {
             playerName = UIHandler.instance.usuario.CurrentUser.UserId;
@@ -319,6 +335,9 @@ namespace Firebase.Sample.Database {
             mutableData.Value = leaders;
             return TransactionResult.Success(mutableData);
         }
+
+
+
         public void AddTableroDeJuego()
         {
             tableroNAme = settingplayer.Instances.TableroName;
@@ -443,6 +462,10 @@ namespace Firebase.Sample.Database {
             return TransactionResult.Success(mutableData);
         }
 
+
+
+
+
         public void playGame()
         {
             tableroNAme = settingplayer.Instances.TableroName;
@@ -561,7 +584,34 @@ namespace Firebase.Sample.Database {
 
         }
 
-
+        public IEnumerator moveremote(int oldx, int oldy, int newx,int newy)
+        {
+            settingplayer.Instances.Color = Otrocolor(settingplayer.Instances.Color);
+            configurarturno();
+            boarmanager.Instance.remoteok(oldx,oldy,newx,newy);
+            /*Debug.Log(settingplayer.Instances.Color+" "+jugadores.player.remoto);
+            boarmanager.Instance.selectchessman(oldx, oldy);
+            yield return new WaitForSeconds(0.1f);
+            Debug.Log(oldx+""+oldy+""+newx+""+newy);
+            boarmanager.Instance.movechessman(newx, newy);
+            Debug.Log("moviendo fichas");*/
+            settingplayer.Instances.Color = Otrocolor(settingplayer.Instances.Color);
+            configurarturno();
+            Debug.Log(settingplayer.Instances.Color);
+            yield return null;
+        }
+        void configurarturno()
+        {
+            if (settingplayer.Instances.Color == "negro")
+            {
+                jugadores.player.remoto = true;
+            }
+            else if (settingplayer.Instances.Color == "blanco")
+            {
+                jugadores.player.remoto = false;
+            }
+            
+        }
 
         public IEnumerator IDebugLog(string s)
         {
